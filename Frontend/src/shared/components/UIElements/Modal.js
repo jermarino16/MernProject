@@ -31,7 +31,6 @@ const ModalOverlay = (props) => {
 const Modal = (props) => {
   return (
     <React.Fragment>
-      Menifee, CA
       {props.show && <Backdrop onClick={props.onCancel} />}
       <CSSTransition
         in={props.show}
