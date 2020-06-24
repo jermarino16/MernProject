@@ -5,6 +5,7 @@ import Input from "../../shared/components/FormElements/Input";
 import Button from "../../shared/components/FormElements/Button";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import ImageUpload from "../../shared/components/FormElements/ImageUpload";
 import {
   VALIDATOR_REQUIRE,
   VALIDATOR_MINLENGTH,
@@ -40,17 +41,18 @@ const NewPlace = () => {
   const placeSubmitHandler = async (event) => {
     event.preventDefault();
     try {
-      await sendRequest(
+      const formData = new FormData();
+      formData.append("title", formState.inputs.title.value);
+      formData.append("description", formState.inputs.description.value);
+      formData.append("address", formState.inputs.address.value);
+      formData.append("image", formState.inputs.image.value);
+      formData.append("creator", auth.userId);
+      const responseData = await sendRequest(
         "http://localhost:5000/api/places",
         "POST",
-        JSON.stringify({
-          title: formState.inputs.title.value,
-          description: formState.inputs.description.value,
-          address: formState.inputs.address.value,
-          creator: auth.userId,
-        }),
-        { "Content-Type": "application/json" }
+        formData
       );
+      console.log(responseData);
       history.push("/");
     } catch (err) {}
   };
@@ -69,6 +71,9 @@ const NewPlace = () => {
           errorText="Please enter a valid title."
           onInput={inputHandler}
         />
+        {auth.isLoggedIn && (
+          <ImageUpload center id="image" onInput={inputHandler} />
+        )}
         <Input
           id="description"
           element="textarea"
