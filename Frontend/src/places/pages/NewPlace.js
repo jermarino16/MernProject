@@ -32,6 +32,10 @@ const NewPlace = () => {
         value: "",
         isValid: false,
       },
+      image: {
+        value: null,
+        isValid: false,
+      },
     },
     false
   );
@@ -45,8 +49,8 @@ const NewPlace = () => {
       formData.append("title", formState.inputs.title.value);
       formData.append("description", formState.inputs.description.value);
       formData.append("address", formState.inputs.address.value);
-      formData.append("image", formState.inputs.image.value);
       formData.append("creator", auth.userId);
+      formData.append("image", formState.inputs.image.value);
       const responseData = await sendRequest(
         "http://localhost:5000/api/places",
         "POST",
@@ -71,9 +75,6 @@ const NewPlace = () => {
           errorText="Please enter a valid title."
           onInput={inputHandler}
         />
-        {auth.isLoggedIn && (
-          <ImageUpload center id="image" onInput={inputHandler} />
-        )}
         <Input
           id="description"
           element="textarea"
@@ -89,6 +90,12 @@ const NewPlace = () => {
           validators={[VALIDATOR_REQUIRE()]}
           errorText="Please enter a valid address."
           onInput={inputHandler}
+        />
+        <ImageUpload
+          center
+          id="image"
+          onInput={inputHandler}
+          errorText="Please provide an image."
         />
         <Button type="submit" disabled={!formState.isValid}>
           ADD PLACE
