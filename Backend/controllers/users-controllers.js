@@ -1,5 +1,5 @@
 const { validationResult } = require("express-validator");
-const bcrpy = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
@@ -26,6 +26,7 @@ const signup = async (req, res, next) => {
       new HttpError("Invalid inputs passed, please check your data.", 422)
     );
   }
+
   const { name, email, password } = req.body;
 
   let existingUser;
@@ -51,7 +52,10 @@ const signup = async (req, res, next) => {
   try {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
-    const error = new HttpError("Could not create user, please try again", 500);
+    const error = new HttpError(
+      "Could not create user, please try again.",
+      500
+    );
     return next(error);
   }
 
@@ -76,10 +80,7 @@ const signup = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      {
-        userId: createdUser.id,
-        email: createdUser.email,
-      },
+      { userId: createdUser.id, email: createdUser.email },
       "supersecret_dont_share",
       { expiresIn: "1h" }
     );
@@ -105,7 +106,7 @@ const login = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      "Loggin in failed, please try again later.",
+      "Logging in failed, please try again later.",
       500
     );
     return next(error);
@@ -121,7 +122,7 @@ const login = async (req, res, next) => {
 
   let isValidPassword = false;
   try {
-    isValidPassword = await bcrpyt.compare(password, existingUser.password);
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
   } catch (err) {
     const error = new HttpError(
       "Could not log you in, please check your credentials and try again.",
@@ -141,10 +142,7 @@ const login = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      {
-        userId: createdUser.id,
-        email: createdUser.email,
-      },
+      { userId: existingUser.id, email: existingUser.email },
       "supersecret_dont_share",
       { expiresIn: "1h" }
     );
@@ -157,8 +155,7 @@ const login = async (req, res, next) => {
   }
 
   res.json({
-    message: "Logged in!",
-    user: existingUser.id,
+    userId: existingUser.id,
     email: existingUser.email,
     token: token,
   });
